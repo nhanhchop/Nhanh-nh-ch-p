@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Nhanh Như Chớp</title>
+
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+}
+
+body{
+    font-family:Arial,sans-serif;
+    color:white;
+    background:
+    radial-gradient(circle at 50% 25%,#185a35,#071b11 50%,#010403);
+}
+
+button{
+    font-family:inherit;
+    color:white;
+    border:0;
+    cursor:pointer;
+}
+
+.screen{
+    display:none;
+    width:100%;
+    height:100%;
+}
+
+.screen.active{display:block}
+
+/* ===== SẢNH ===== */
+
+.lobby{
+    overflow-y:auto;
+    padding-bottom:30px;
+}
+
+.top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 18px;
+    background:#03100aee;
+    border-bottom:1px solid #27ff65;
+}
+
+.profile{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.avatar{
+    width:45px;
+    height:45px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#173c29;
+    border:2px solid #55ff88;
+    font-size:22px;
+}
+
+.name{font-weight:bold}
+.lv{color:#73ff9b;font-size:12px}
+
+.coins{
+    background:#142e20;
+    border:1px solid #ffe45b;
+    border-radius:20px;
+    padding:9px 14px;
+    color:#ffe45b;
+    font-weight:bold;
+}
+
+.logo{
+    text-align:center;
+    margin:35px 10px 25px;
+    font-size:clamp(42px,11vw,78px);
+    font-weight:1000;
+    line-height:.82;
+    font-style:italic;
+    color:#b5ff36;
+    text-shadow:0 0 8px white,0 0 20px #32ff63,0 0 45px #00ff55;
+    animation:logoGlow 2s infinite alternate;
+}
+
+.logo small{
+    display:block;
+    color:#4ffaff;
+    font-size:.48em;
+    margin-top:10px;
+}
+
+@keyframes logoGlow{
+    from{transform:scale(1)}
+    to{transform:scale(1.025)}
+}
+
+.menu{
+    width:min(900px,94%);
+    margin:auto;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+.menu button{
+    min-height:82px;
+    border-radius:18px;
+    background:linear-gradient(145deg,#103c25,#062113);
+    border:2px solid #31ef64;
+    font-size:17px;
+    font-weight:bold;
+    box-shadow:0 0 18px #00ff4920;
+    transition:.15s;
+}
+
+.menu button:first-child{
+    background:linear-gradient(145deg,#8b6900,#4b3500);
+    border-color:#ffe35b;
+}
+
+.menu button:active{transform:scale(.96)}
+
+.stats{
+    width:min(900px,94%);
+    margin:18px auto;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+}
+
+.stat{
+    background:#04150ce8;
+    border:1px solid #2be95d;
+    border-radius:15px;
+    padding:13px 5px;
+    text-align:center;
+}
+
+.stat b{
+    display:block;
+    color:#aaff3e;
+    font-size:25px;
+    margin-top:5px;
+}
+
+/* ===== GAME ===== */
+
+.game{padding:10px}
+
+.game-top{
+    height:55px;
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    align-items:center;
+}
+
+.back{
+    justify-self:start;
+    padding:9px 13px;
+    background:#092719;
+    border:1px solid #36ef65;
+    border-radius:12px;
+}
+
+.timer{
+    font-size:36px;
+    font-weight:1000;
+    color:#ffe45a;
+    text-shadow:0 0 18px #ffe45a;
+}
+
+.timer.danger{
+    color:#ff4040;
+    animation:pulse .45s infinite alternate;
+}
+
+.money{
+    justify-self:end;
+    color:#ffe45a;
+    font-weight:bold;
+}
+
+@keyframes pulse{
+    to{transform:scale(1.1);opacity:.55}
+}
+
+.game-layout{
+    height:calc(100vh - 65px);
+    display:grid;
+    grid-template-columns:190px 1fr;
+    gap:12px;
+}
+
+/* ===== TOWER ===== */
+
+.tower{
+    position:relative;
+    border:2px solid #38ff68;
+    border-radius:22px;
+    background:linear-gradient(90deg,#03150a,#0b3920,#03150a);
+    padding:10px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    box-shadow:inset 0 0 35px #00ff4530,0 0 25px #00ff4520;
+}
+
+.tower:before{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:25px;
+    bottom:25px;
+    width:45px;
+    transform:translateX(-50%);
+    border-left:5px solid #789889;
+    border-right:5px solid #789889;
+    opacity:.6;
+}
+
+.tower-title{
+    position:relative;
+    z-index:2;
+    text-align:center;
+    color:#baff45;
+    font-size:13px;
+    font-weight:bold;
+    margin-bottom:5px;
+}
+
+.floor{
+    position:relative;
+    z-index:2;
+    flex:1;
+    min-height:30px;
+    margin:2px 0;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(90deg,#17271d,#6d8174,#17271d);
+    border:2px solid #9caf9f;
+    color:white;
+    font-weight:1000;
+    text-shadow:0 2px 3px #000;
+    transition:.3s;
+}
+
+.floor.current{
+    background:linear-gradient(90deg,#826400,#ffe13c,#826400);
+    color:#111;
+    border-color:#fff19a;
+    box-shadow:0 0 20px #ffe03b;
+    transform:scale(1.06);
+}
+
+.floor.correct{
+    background:linear-gradient(90deg,#087c30,#25ed61,#087c30);
+    border-color:#9cffae;
+    box-shadow:0 0 16px #24ff60;
+}
+
+.floor.wrong{
+    background:linear-gradient(90deg,#821515,#ed3030,#821515);
+    border-color:#ff7777;
+    box-shadow:0 0 20px #ff3030;
+    animation:redShake .4s;
+}
+
+@keyframes redShake{
+    25%{transform:translateX(-5px)}
+    50%{transform:translateX(5px)}
+    75%{transform:translateX(-5px)}
+}
+
+/* ===== QUESTION ===== */
+
+.question-area{
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:10px 20px;
+}
+
+.counter{
+    color:#aaff3e;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.question{
+    width:100%;
+    max-width:800px;
+    min-height:100px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:clamp(23px,4vw,36px);
+    font-weight:1000;
+    line-height:1.2;
+    padding:15px;
+}
+
+.answers{
+    width:100%;
+    max-width:800px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+.answer{
+    min-height:70px;
+    padding:12px;
+    border-radius:16px;
+    border:2px solid #39ed67;
+    background:linear-gradient(145deg,#103d25,#071e12);
+    font-size:18px;
+    font-weight:bold;
+    transition:.15s;
+}
+
+.answer:active{transform:scale(.96)}
+
+.answer.correct{
+    background:#0ba33d;
+    border-color:#a0ffb4;
+    box-shadow:0 0 25px #22ff60;
+}
+
+.answer.wrong{
+    background:#c92121;
+    border-color:#ff8989;
+}
+
+.answer.eliminated{
+    opacity:.18;
+    pointer-events:none;
+    transform:scale(.95);
+}
+
+.answer:disabled{cursor:not-allowed}
+
+/* ===== HELPERS ===== */
+
+.helpers{
+    width:100%;
+    max-width:800px;
+    margin-top:15px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+}
+
+.help{
+    min-height:65px;
+    border-radius:15px;
+    background:#092b19;
+    border:1px solid #36ed64;
+    font-weight:bold;
+}
+
+.help.used{
+    opacity:.35;
+    pointer-events:none;
+}
+
+.help span{
+    display:block;
+    color:#ffe45b;
+    font-size:12px;
+    margin-top:4px;
+}
+
+/* ===== MODAL ===== */
+
+.modal{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:#000c;
+    z-index:100;
+    padding:20px;
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-box{
+    width:min(500px,100%);
+    max-height:90vh;
+    overflow:auto;
+    background:#062214;
+    border:2px solid #3cff68;
+    border-radius:22px;
+    padding:25px;
+    text-align:center;
+}
+
+.modal-box h2{color:#b5ff3c}
+
+.close{
+    margin-top:15px;
+    padding:11px 25px;
+    border-radius:12px;
+    background:#35e85f;
+    color:#061008;
+    font-weight:bold;
+}
+
+/* ===== MOBILE ===== */
+
+@media(max-width:700px){
+
+    .menu{grid-template-columns:1fr 1fr}
+
+    .menu button{
+        min-height:70px;
+        font-size:14px;
+    }
+
+    .stats{grid-template-columns:1fr 1fr}
+
+    .game-layout{
+        grid-template-columns:105px 1fr;
+        gap:6px;
+    }
+
+    .tower{padding:5px;border-radius:16px}
+    .tower-title{font-size:9px}
+    .floor{font-size:12px;min-height:24px}
+
+    .question-area{padding:5px}
+
+    .question{
+        font-size:19px;
+        min-height:80px;
+    }
+
+    .answers{gap:6px}
+
+    .answer{
+        min-height:55px;
+        font-size:13px;
+        padding:7px;
+    }
+
+    .helpers{gap:5px}
+
+    .help{
+        font-size:11px;
+        min-height:55px;
+    }
+
+    .timer{font-size:27px}
+    .money{font-size:11px}
+}
+</style>
+</head>
+
+<body>
+
+<section id="lobby" class="screen active lobby">
+
+<div class="top">
+    <div class="profile">
+        <div class="avatar">⚡</div>
+        <div>
+            <div class="name">Người chơi</div>
+            <div class="lv">LEVEL 1</div>
+        </div>
+    </div>
+
+    <div class="coins">🪙 <span id="coins">1000</span></div>
+</div>
+
+<div class="logo">
+    NHANH NHƯ
+    <small>⚡ CHỚP ⚡</small>
+</div>
+
+<div class="menu">
+
+<button onclick="startGame()">
+    ⚡ CHƠI NGAY
+    <br><small>10 câu hỏi</small>
+</button>
+
+<button onclick="showInfo('MULTIPLAYER')">
+    👥 MULTIPLAYER
+    <br><small>Đấu cùng người khác</small>
+</button>
+
+<button onclick="showInfo('THỬ THÁCH')">
+    🎯 THỬ THÁCH
+    <br><small>Chế độ đặc biệt</small>
+</button>
+
+<button onclick="openShop()">
+    🛒 CỬA HÀNG
+    <br><small>Trợ giúp</small>
+</button>
+
+</div>
+
+<div class="stats">
+
+<div class="stat">🎮<small>SỐ TRẬN</small><b id="games">0</b></div>
+<div class="stat">🏆<small>THẮNG</small><b id="wins">0</b></div>
+<div class="stat">⚡<small>KỶ LỤC</small><b id="best">0</b></div>
+<div class="stat">🪙<small>XU</small><b id="lobbyCoins">1000</b></div>
+
+</div>
+</section>
+
+
+<section id="game" class="screen game">
+
+<div class="game-top">
+
+<button class="back" onclick="backLobby()">← SẢNH</button>
+
+<div id="timer" class="timer">02:00</div>
+
+<div class="money">
+🪙 <span id="gameCoins">1000</span>
+</div>
+
+</div>
+
+<div class="game-layout">
+
+<div class="tower">
+
+<div class="tower-title">⚡ NHANH NHƯ CHỚP</div>
+
+<div id="floor10" class="floor">10 🏆</div>
+<div id="floor9" class="floor">9</div>
+<div id="floor8" class="floor">8</div>
+<div id="floor7" class="floor">7</div>
+<div id="floor6" class="floor">6</div>
+<div id="floor5" class="floor">5</div>
+<div id="floor4" class="floor">4</div>
+<div id="floor3" class="floor">3</div>
+<div id="floor2" class="floor">2</div>
+<div id="floor1" class="floor">1</div>
+<div id="floor0" class="floor">0</div>
+
+</div>
+
+<div class="question-area">
+
+<div id="counter" class="counter">CÂU 1</div>
+
+<div id="question" class="question">Câu hỏi</div>
+
+<div id="answers" class="answers"></div>
+
+<div class="helpers">
+
+<button id="help5050" class="help" onclick="help5050()">
+✂️ 50 : 50
+<span>500 🪙</span>
+</button>
+
+<button id="helpAudience" class="help" onclick="helpAudience()">
+👥 KHÁN GIẢ
+<span>800 🪙</span>
+</button>
+
+<button id="helpChange" class="help" onclick="changeQuestion()">
+🔄 ĐỔI CÂU
+<span>700 🪙</span>
+</button>
+
+</div>
+</div>
+</div>
+</section>
+
+
+<div id="modal" class="modal">
+
+<div class="modal-box">
+
+<h2 id="modalTitle"></h2>
+
+<div id="modalContent"></div>
+
+<button class="close" onclick="closeModal()">ĐÓNG</button>
+
+</div>
+</div>
+
+
+<script>
+
+/* =========================
+        CÂU HỎI
+========================= */
+
+const questions=[
+
+{
+q:"Có công mài sắt, có ngày nên gì?",
+a:["Kim","Vàng","Đá","Ngọc"],c:0,type:"Ca dao"
+},
+
+{
+q:"Cái gì càng lấy đi thì càng lớn?",
+a:["Cái túi","Cái hố","Cái cây","Cái hộp"],c:1,type:"Đố mẹo"
+},
+
+{
+q:"Một tuần có bao nhiêu ngày?",
+a:["5","6","7","8"],c:2,type:"Kiến thức"
+},
+
+{
+q:"2 + 2 × 3 = ?",
+a:["8","10","12","6"],c:0,type:"Toán"
+},
+
+{
+q:"Ai là tác giả Truyện Kiều?",
+a:["Nguyễn Du","Nguyễn Trãi","Nam Cao","Xuân Diệu"],c:0,type:"Văn học"
+},
+
+{
+q:"Nước đóng băng ở bao nhiêu độ C?",
+a:["0°C","10°C","50°C","100°C"],c:0,type:"Khoa học"
+},
+
+{
+q:"Kim loại có ký hiệu Fe là gì?",
+a:["Vàng","Sắt","Bạc","Đồng"],c:1,type:"Khoa học"
+},
+
+{
+q:"Đỉnh núi cao nhất Việt Nam là gì?",
+a:["Fansipan","Ngọc Linh","Bạch Mã","Langbiang"],c:0,type:"Địa lý"
+},
+
+{
+q:"17 × 19 = ?",
+a:["303","323","343","363"],c:1,type:"Toán"
+},
+
+{
+q:"2 mũ 12 bằng bao nhiêu?",
+a:["1024","2048","4096","8192"],c:2,type:"Toán"
+},
+
+{
+q:"Quốc kỳ Việt Nam có nền màu gì?",
+a:["Xanh","Đỏ","Vàng","Trắng"],c:1,type:"Kiến thức"
+},
+
+{
+q:"Tiếng Anh của 'mèo' là gì?",
+a:["Dog","Fish","Cat","Bird"],c:2,type:"Ngoại ngữ"
+},
+
+{
+q:"Bài hát 'Lạc Trôi' là của ca sĩ nào?",
+a:["Sơn Tùng M-TP","Đen Vâu","Jack","Noo Phước Thịnh"],c:0,type:"Âm nhạc"
+},
+
+{
+q:"Nốt nhạc nào đứng sau nốt Đô?",
+a:["Mi","Rê","Fa","Sol"],c:1,type:"Âm nhạc"
+}
+
+];
+
+
+/* =========================
+        BIẾN
+========================= */
+
+let coins=Number(localStorage.getItem("my_nn_coins")||1000);
+let games=Number(localStorage.getItem("my_nn_games")||0);
+let wins=Number(localStorage.getItem("my_nn_wins")||0);
+let best=Number(localStorage.getItem("my_nn_best")||0);
+
+let current=0;
+let streak=0;
+
+/* THÀNH TÍCH CAO NHẤT TRONG TRẬN */
+let maxStreak=0;
+
+let locked=false;
+let time=120;
+let timer=null;
+
+let usedQuestions=new Set();
+
+let currentQuestion=null;
+let currentIndex=-1;
+let currentAnswers=[];
+
+let helpUsed={
+    fifty:false,
+    audience:false,
+    change:false
+};
+
+
+/* =========================
+        UI
+========================= */
+
+function updateUI(){
+
+document.getElementById("coins").textContent=coins;
+document.getElementById("lobbyCoins").textContent=coins;
+document.getElementById("gameCoins").textContent=coins;
+
+document.getElementById("games").textContent=games;
+document.getElementById("wins").textContent=wins;
+document.getElementById("best").textContent=best;
+
+}
+
+
+/* =========================
+        SAVE
+========================= */
+
+function save(){
+
+localStorage.setItem("my_nn_coins",coins);
+localStorage.setItem("my_nn_games",games);
+localStorage.setItem("my_nn_wins",wins);
+localStorage.setItem("my_nn_best",best);
+
+updateUI();
+
+}
+
+
+/* =========================
+        BẮT ĐẦU
+========================= */
+
+function startGame(){
+
+document.getElementById("lobby").classList.remove("active");
+document.getElementById("game").classList.add("active");
+
+current=0;
+streak=0;
+maxStreak=0;
+locked=false;
+time=120;
+
+usedQuestions.clear();
+
+resetHelpers();
+resetTower();
+
+showQuestion();
+
+clearInterval(timer);
+
+timer=setInterval(()=>{
+
+time--;
+
+updateTimer();
+
+if(time<=0){
+finish(false);
+}
+
+},1000);
+
+updateTimer();
+
+}
+
+
+/* =========================
+        TIMER
+========================= */
+
+function updateTimer(){
+
+let m=Math.floor(time/60);
+let s=time%60;
+
+document.getElementById("timer").textContent=
+String(m).padStart(2,"0")+":"+
+String(s).padStart(2,"0");
+
+document.getElementById("timer")
+.classList.toggle("danger",time<=10);
+
+}
+
+
+/* =========================
+        TOWER
+========================= */
+
+function resetTower(){
+
+for(let i=0;i<=10;i++){
+
+let f=document.getElementById("floor"+i);
+
+f.className="floor";
+
+}
+
+document.getElementById("floor0")
+.classList.add("current");
+
+}
+
+
+function clearGreenFloors(){
+
+for(let i=0;i<=10;i++){
+
+document.getElementById("floor"+i)
+.classList.remove("correct");
+
+}
+
+}
+
+
+function updateTower(){
+
+for(let i=0;i<=10;i++){
+
+document.getElementById("floor"+i)
+.classList.remove("current");
+
+}
+
+document.getElementById("floor"+streak)
+.classList.add("current");
+
+}
+
+
+/* =========================
+        LẤY CÂU MỚI
+========================= */
+
+function getNewQuestion(){
+
+let available=questions
+.map((q,i)=>i)
+.filter(i=>!usedQuestions.has(i));
+
+if(available.length===0){
+
+usedQuestions.clear();
+
+available=questions
+.map((q,i)=>i)
+.filter(i=>i!==currentIndex);
+
+}
+
+const index=
+available[Math.floor(Math.random()*available.length)];
+
+usedQuestions.add(index);
+
+currentIndex=index;
+currentQuestion=questions[index];
+
+return currentQuestion;
+
+}
+
+
+/* =========================
+        HIỆN CÂU
+========================= */
+
+function showQuestion(){
+
+const q=getNewQuestion();
+
+resetHelpers();
+
+document.getElementById("counter")
+.textContent="CÂU "+(current+1);
+
+document.getElementById("question")
+.innerHTML=
+`<small style="
+display:block;
+color:#4ffaff;
+font-size:12px;
+margin-bottom:8px">
+${q.type}
+</small>${q.q}`;
+
+const box=document.getElementById("answers");
+
+box.innerHTML="";
+
+currentAnswers=q.a.map((text,index)=>({
+text:text,
+correct:index===q.c
+}));
+
+currentAnswers.sort(()=>Math.random()-.5);
+
+currentAnswers.forEach(item=>{
+
+const button=document.createElement("button");
+
+button.className="answer";
+button.textContent=item.text;
+
+button.onclick=()=>{
+answer(button,item.correct);
+};
+
+box.appendChild(button);
+
+});
+
+}
+
+
+/* =========================
+        TRẢ LỜI
+========================= */
+
+function answer(button,correct){
+
+if(locked || time<=0)return;
+
+locked=true;
+
+document.querySelectorAll(".answer")
+.forEach(b=>b.disabled=true);
+
+
+/* ===== ĐÚNG ===== */
+
+if(correct){
+
+button.classList.add("correct");
+
+const floor=
+document.getElementById("floor"+streak);
+
+floor.classList.remove("current");
+floor.classList.add("correct");
+
+streak++;
+
+/*
+  QUAN TRỌNG:
+  maxStreak KHÔNG BAO GIỜ
+  bị reset khi sai.
+*/
+
+if(streak>maxStreak){
+
+maxStreak=streak;
+
+}
+
+if(streak>best){
+
+best=streak;
+
+save();
+
+}
+
+
+/* VỀ ĐÍCH */
+
+if(streak>=10){
+
+setTimeout(()=>{
+finish(true);
+},500);
+
+return;
+
+}
+
+updateTower();
+
+setTimeout(()=>{
+
+current++;
+locked=false;
+
+showQuestion();
+
+},500);
+
+return;
+
+}
+
+
+/* ===== SAI ===== */
+
+button.classList.add("wrong");
+
+/* Hiện đáp án đúng */
+
+document.querySelectorAll(".answer")
+.forEach(b=>{
+
+const item=currentAnswers
+.find(x=>x.text===b.text);
+
+if(item && item.correct){
+
+b.classList.add("correct");
+
+}
+
+});
+
+
+/* Tầng hiện tại đỏ */
+
+const floor=
+document.getElementById("floor"+streak);
+
+floor.classList.remove("current");
+floor.classList.add("wrong");
+
+
+setTimeout(()=>{
+
+/*
+  Xóa màu xanh.
+  Nhưng KHÔNG xóa maxStreak.
+*/
+
+clearGreenFloors();
+
+floor.classList.remove("wrong");
+
+streak=0;
+
+/*
+  回 về tầng 0.
+*/
+updateTower();
+
+/*
+  QUAN TRỌNG:
+  vẫn tăng số câu và tiếp tục chơi.
+*/
+current++;
+
+locked=false;
+
+if(time>0){
+
+showQuestion();
+
+}
+
+},800);
+
+}
+
+
+/* =========================
+        TRỢ GIÚP
+========================= */
+
+function resetHelpers(){
+
+helpUsed={
+fifty:false,
+audience:false,
+change:false
+};
+
+document.getElementById("help5050")
+.classList.remove("used");
+
+document.getElementById("helpAudience")
+.classList.remove("used");
+
+document.getElementById("helpChange")
+.classList.remove("used");
+
+}
+
+
+/* =========================
+        50:50
+========================= */
+
+function help5050(){
+
+if(locked)return;
+
+if(helpUsed.fifty){
+
+alert("Bạn đã sử dụng 50:50 ở câu này!");
+return;
+
+}
+
+if(coins<500){
+
+alert("Không đủ xu!");
+return;
+
+}
+
+const buttons=[
+...document.querySelectorAll(".answer")
+];
+
+/*
+  Chỉ lấy đáp án sai.
+*/
+
+const wrongButtons=buttons.filter(button=>{
+
+const item=currentAnswers
+.find(x=>x.text===button.text);
+
+return item && !item.correct;
+
+});
+
+/*
+  Xóa chính xác 2 đáp án sai.
+*/
+
+wrongButtons.sort(()=>Math.random()-.5);
+
+wrongButtons.slice(0,2).forEach(button=>{
+
+button.classList.add("eliminated");
+button.disabled=true;
+
+});
+
+coins-=500;
+
+helpUsed.fifty=true;
+
+document.getElementById("help5050")
+.classList.add("used");
+
+save();
+
+}
+
+
+/* =========================
+        KHÁN GIẢ
+========================= */
+
+function helpAudience(){
+
+if(locked)return;
+
+if(helpUsed.audience){
+
+alert("Bạn đã dùng khán giả!");
+return;
+
+}
+
+if(coins<800){
+
+alert("Không đủ xu!");
+return;
+
+}
+
+coins-=800;
+
+helpUsed.audience=true;
+
+document.getElementById("helpAudience")
+.classList.add("used");
+
+save();
+
+let percentages=[10,15,20,25];
+
+const correctIndex=
+currentAnswers.findIndex(x=>x.correct);
+
+let remain=100;
+
+let result=[];
+
+for(let i=0;i<4;i++){
+
+if(i===correctIndex){
+
+result[i]=0;
+
+}else{
+
+let value=Math.floor(Math.random()*20)+5;
+
+result[i]=value;
+remain-=value;
+
+}
+
+}
+
+result[correctIndex]=remain;
+
+let html="<h3>👥 KHÁN GIẢ</h3>";
+
+currentAnswers.forEach((item,i)=>{
+
+html+=`
+<p>
+<b>${item.text}</b> — ${result[i]}%
+</p>
+`;
+
+});
+
+showModal("👥 KHÁN GIẢ",html);
+
+}
+
+
+/* =========================
+        ĐỔI CÂU
+========================= */
+
+function changeQuestion(){
+
+if(locked)return;
+
+if(helpUsed.change){
+
+alert("Bạn đã đổi câu!");
+return;
+
+}
+
+if(coins<700){
+
+alert("Không đủ xu!");
+return;
+
+}
+
+coins-=700;
+
+helpUsed.change=true;
+
+document.getElementById("helpChange")
+.classList.add("used");
+
+save();
+
+/*
+  showQuestion() lấy câu chưa dùng,
+  nên không quay lại câu hiện tại.
+*/
+
+showQuestion();
+
+}
+
+
+/* =========================
+        KẾT THÚC
+========================= */
+
+function finish(won){
+
+clearInterval(timer);
+
+games++;
+
+const finalScore=maxStreak;
+
+if(won){
+
+wins++;
+
+}
+
+/*
+  Thưởng dựa trên thành tích CAO NHẤT,
+  không phải streak hiện tại.
+*/
+
+const reward=finalScore*100;
+
+coins+=reward;
+
+if(won){
+
+coins+=1000;
+
+}
+
+if(finalScore>best){
+
+best=finalScore;
+
+}
+
+save();
+
+document.getElementById("game")
+.classList.remove("active");
+
+document.getElementById("lobby")
+.classList.add("active");
+
+updateUI();
+
+showModal(
+won?"🏆 VỀ ĐÍCH!":"⏰ HẾT GIỜ!",
+`
+Bạn đạt thành tích cao nhất:
+
+<br><br>
+
+<strong style="
+font-size:50px;
+color:#aaff3e">
+${finalScore}
+</strong>
+
+<br>
+câu liên tiếp
+
+<br><br>
+
+🪙 +${reward+(won?1000:0)} xu
+`
+);
+
+}
+
+
+/* =========================
+        VỀ SẢNH
+========================= */
+
+function backLobby(){
+
+clearInterval(timer);
+
+document.getElementById("game")
+.classList.remove("active");
+
+document.getElementById("lobby")
+.classList.add("active");
+
+locked=false;
+
+}
+
+
+/* =========================
+        MODAL
+========================= */
+
+function showModal(title,content){
+
+document.getElementById("modalTitle")
+.textContent=title;
+
+document.getElementById("modalContent")
+.innerHTML=content;
+
+document.getElementById("modal")
+.classList.add("show");
+
+}
+
+
+function closeModal(){
+
+document.getElementById("modal")
+.classList.remove("show");
+
+}
+
+
+/* =========================
+        SHOP
+========================= */
+
+function openShop(){
+
+showModal(
+"🛒 CỬA HÀNG",
+`
+<p>🪙 Bạn có <b>${coins}</b> xu</p>
+
+<p>
+50:50 — 500 xu<br>
+Khán giả — 800 xu<br>
+Đổi câu — 700 xu
+</p>
+
+<p>
+Trợ giúp được mua trong cửa hàng
+sẽ được trừ xu khi sử dụng trong trận.
+</p>
+`
+);
+
+}
+
+
+function showInfo(type){
+
+showModal(
+"🎮 "+type,
+"Chế độ này sẽ được phát triển sau."
+);
+
+}
+
+
+updateUI();
+
+</script>
+
+</body>
+</html>
